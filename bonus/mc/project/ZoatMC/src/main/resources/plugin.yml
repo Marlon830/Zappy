@@ -1,0 +1,11 @@
+name: ZoatMC
+version: '1.0.0'
+main: org.zoatmc.core.ZoatPlugin
+api-version: '1.20'
+depend: [Citizens]
+
+commands:
+  zoat:
+    description: "Game management and control command for the 2oat plugin"
+    aliases: [z, zoatmc]
+    usage: "/zoat <subcommand> [args...]"

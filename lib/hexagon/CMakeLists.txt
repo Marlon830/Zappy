@@ -1,0 +1,12 @@
+set(ZOAT_DIR_LIB_HEXAGON     "${ZOAT_DIR_LIB}/hexagon")
+set(ZOAT_DIR_LIB_HEXAGON_SRC "${ZOAT_DIR_LIB_HEXAGON}/src")
+set(ZOAT_DIR_LIB_HEXAGON_INC "${ZOAT_DIR_LIB_HEXAGON}/include")
+
+file(GLOB_RECURSE ZOAT_LIB_HEXAGON_SRC "${ZOAT_DIR_LIB_HEXAGON_SRC}/*.c")
+
+include_directories(${ZOAT_DIR_LIB_HEXAGON_INC})
+
+add_library(
+    hexagon STATIC
+    ${ZOAT_LIB_HEXAGON_SRC}
+)

@@ -1,0 +1,203 @@
+FROM robertdebock/archlinux
+
+# System initialization
+RUN pacman-key --init
+RUN pacman-key --populate archlinux
+RUN pacman -Syu --noconfirm
+
+# Pacman configuration
+RUN sed -i 's/#Color/Color/' /etc/pacman.conf
+RUN sed -i 's/#TotalDownload/TotalDownload/' /etc/pacman.conf
+RUN sed -i 's/NoProgressBar/ILoveCandy/' /etc/pacman.conf
+
+# Base packages installation
+RUN pacman -S --noconfirm \
+    base-devel man-db man-pages \
+    cmake ninja \
+    gdb \
+    podman podman-compose podman-docker fuse-overlayfs \
+    \
+    git \
+    \
+    zsh grml-zsh-config \
+    vim nano emacs \
+    \
+    net-tools inetutils openbsd-netcat
+
+# System configuration
+RUN setcap cap_net_raw=ep $(which ping)
+
+# Project specific packages installation
+RUN pacman -S --noconfirm \
+    python python-pip python-virtualenv python-packaging python-setuptools python-wheel \
+    cuda cudnn
+RUN ln -sf /usr/lib/libcudnn.so.9 /usr/lib/libcudnn.so.8
+
+# OpenSSH server configuration
+RUN pacman -S --noconfirm openssh
+RUN ssh-keygen -A
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+RUN sed -i 's/#Port 22/Port 1987/' /etc/ssh/sshd_config
+RUN systemctl enable sshd
+EXPOSE 1987
+
+# Zoat-specific configuration
+RUN groupadd epitech
+COPY share /usr/share/zoat
+RUN chown -R root:epitech /usr/share/zoat
+
+# Copy tools tree and add it to PATH
+COPY tools /epi/tools/
+RUN chown -R root:epitech /epi/tools
+RUN echo -ne '\
+# Add Epitech-related tools\
+export PATH=$PATH:/epi/tools\n\
+'>> /etc/profile.d/zoat.sh
+
+# Install reference archive
+COPY share/resources/zappy_reference.tar.gz /tmp/zappy_reference.tar.gz
+RUN mkdir -p /epi/reference
+RUN tar -zxf /tmp/zappy_reference.tar.gz -C /epi/reference
+RUN chown -R root:epitech /epi/reference
+
+# Configure Tensorflow to use dynamic GPU memory allocation
+RUN echo -ne '\
+# Configure Tensorflow to use dynamic GPU memory allocation\
+export TF_FORCE_GPU_ALLOW_GROWTH=true\n\
+'>> /etc/profile.d/zoat.sh
+
+# Trizen builder configuration
+RUN useradd -m builder
+RUN echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+RUN echo 'builder:builder' | chpasswd
+RUN chown -R builder:builder /home/builder
+RUN chsh -s /bin/zsh builder
+
+# VNC server installation
+RUN pacman -S --noconfirm tigervnc
+
+# Fonts installation
+RUN pacman -S --noconfirm ttf-dejavu ttf-liberation noto-fonts
+
+# LightDM installation
+RUN pacman -S --noconfirm lightdm lightdm-gtk-greeter xorg-server accountsservice
+RUN echo -ne '\
+enabled=true\n\
+listen-address=0.0.0.0\n\
+depth=24\n\
+width=1600\n\
+height=900\n\
+port=1984\n\
+command=/usr/bin/Xvnc -SecurityTypes None -IdleTimeout 0 -MaxDisconnectionTime 0 -MaxConnectionTime 0 -MaxIdleTime 0\n\
+' >> /etc/lightdm/lightdm.conf
+RUN sed -i 's/#start-default-seat=true/start-default-seat=false/' /etc/lightdm/lightdm.conf
+RUN systemctl enable lightdm
+
+# Xfce desktop environment installation
+RUN pacman -S --noconfirm xfce4 xfce4-goodies gvfs gvfs-nfs
+
+# Firefox installation
+RUN pacman -S --noconfirm firefox hunspell-en_US
+
+# FTP server installation
+RUN pacman -S --noconfirm vsftpd
+RUN sed -i 's/#write_enable=YES/write_enable=YES/' /etc/vsftpd.conf
+RUN sed -i 's/#local_enable=YES/local_enable=YES/' /etc/vsftpd.conf
+RUN sed -i 's/#chroot_local_user=YES/chroot_local_user=YES/' /etc/vsftpd.conf
+RUN sed -i 's/#allow_writeable_chroot=YES/allow_writeable_chroot=YES/' /etc/vsftpd.conf
+RUN echo -ne 'listen_port=1985\n\
+ftp_data_port=1986\n\
+allow_writeable_chroot=YES\n\
+pasv_enable=yes\n\
+pasv_min_port=10000\n\
+pasv_max_port=12000\n\
+' >> /etc/vsftpd.conf
+RUN systemctl enable vsftpd
+
+# PyCharm installation
+RUN pacman -S --noconfirm pycharm-community-edition
+
+# Trizen installation
+USER builder
+RUN git clone 'https://aur.archlinux.org/trizen.git' /tmp/trizen
+RUN cd /tmp/trizen && makepkg -si --noconfirm
+RUN rm -rf /tmp/trizen
+
+# Visual Studio Code installation
+RUN trizen -S --noconfirm visual-studio-code-bin
+
+# SFML 2.5.1 installation
+RUN cd /home/builder && git clone 'https://aur.archlinux.org/sfml-git.git'
+RUN sed -i 's,source=("git+https://github.com/SFML/SFML.git"),source=("git+https://github.com/SFML/SFML.git#tag=2.5.1"),g' /home/builder/sfml-git/PKGBUILD
+RUN cd /home/builder/sfml-git && makepkg -si --noconfirm
+RUN rm -r /home/builder/sfml-git
+
+# Raylib installation
+RUN trizen -S --noconfirm raylib-cpp-git
+
+# ImGUI installation
+RUN trizen -S --noconfirm imgui
+
+# Ghidra installation
+RUN trizen -S --noconfirm ghidra-desktop
+
+# Remove builder user
+USER root
+RUN userdel builder
+RUN rm -rf /home/builder
+RUN sed -i '$ d' /etc/sudoers
+
+# Localization configuration
+RUN ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
+RUN sed -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+RUN locale-gen
+RUN echo -ne 'LANG=en_US.UTF-8' > /etc/locale.conf
+
+# Users configuration
+RUN chown -R root:epitech /epi
+RUN sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+RUN pacman -S --noconfirm xdg-user-dirs xdg-user-dirs-gtk
+RUN \
+while read -r user; do \
+    echo "Setting up user '$user'"; \
+    \
+    if [[ "$user" != "root" ]]; then \
+        useradd "$user" && \
+        usermod -aG epitech,wheel "$user" && \
+        \
+        chsh -s /bin/zsh "$user" && \
+        mkdir -p "/home/$user" && \
+        echo "source /etc/profile" >> "/home/$user/.zshrc" && \
+        \
+        chmod 750 "/home/$user" && \
+        chown -R "$user:$user" "/home/$user" && \
+        su -c "xdg-user-dirs-update" "$user" && \
+        su -c "cp -rf /usr/share/zoat/defaults/{*,.*} \"/home/$user\"" "$user" && \
+        su -c "ln -sf /epi/zoat \"/home/$user/Desktop/Zoat\"" "$user" && \
+        su -c "ln -sf /epi/reference \"home/$user/Desktop/Reference\"" "$user" && \
+        su -c "chmod 750 \$(find \"/home/$user/Desktop/\" -name \"*.desktop\")" "$user"; \
+    fi; \
+    \
+    echo -ne "$user:$user\n" | chpasswd; \
+done <<EOF
+root
+allan
+alexis
+alexandre
+edgar
+marlon
+theodore
+EOF
+VOLUME /home
+
+# Clean-up system
+RUN yes | pacman -Scc
+RUN rm -rf \
+    /var/cache/pacman/pkg/* \
+    /var/lib/pacman/sync/* \
+    /var/log/pacman.log \
+    /root/.cache
+
+# Configure default shell
+RUN chsh -s /bin/zsh

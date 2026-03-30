@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=OpenJDK Java 17 Console
+NoDisplay=true
+Comment=OpenJDK Java 17 Monitoring & Management Console
+Icon=java17-openjdk
+Exec=/usr/lib/jvm/java-17-openjdk/bin/jconsole
+Actions=
+Categories=Application;System;
+Keywords=java;console;monitoring;

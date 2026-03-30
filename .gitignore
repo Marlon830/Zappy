@@ -1,0 +1,33 @@
+# Project Binaries
+/zappy_ai
+/zappy_gui
+/zappy_server
+
+# Python-specific Folders
+__pycache__
+
+# Build Folders
+/build
+/Session.vim
+/bonus/mc/project/ZoatMC/target
+/bonus/mc/plugins/ZoatMC*
+/bonus/mc/plugins/bStats
+/bonus/mc/plugins/PluginMetrics
+/bonus/mc/project/ZoatMC/dependency-reduced-pom.xml
+/bonus/mc/plugins/Citizens/
+/bonus/mc/project/ZoatMC/src/main/_minecraft/
+
+# GUI-specific Files
+/imgui.ini
+
+# IDE-specific Folders
+.vscode
+.ycm_extra_conf.py
+.idea
+
+# General Files
+*.a
+*.o
+*.so
+*.ini
+log.txt

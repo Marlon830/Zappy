@@ -1,0 +1,62 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "minecraft:item/paper"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1000
+      },
+      "model": "zoat:item/arrow_up"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1001
+      },
+      "model": "zoat:item/arrow_down"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1002
+      },
+      "model": "zoat:item/arrow_left"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1003
+      },
+      "model": "zoat:item/arrow_right"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1004
+      },
+      "model": "zoat:item/magnifying_glass"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1005
+      },
+      "model": "zoat:item/player_fork"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1006
+      },
+      "model": "zoat:item/player_eject"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1007
+      },
+      "model": "zoat:item/player_take"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1008
+      },
+      "model": "zoat:item/player_set"
+    }
+  ]
+}

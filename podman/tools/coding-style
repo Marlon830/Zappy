@@ -1,0 +1,5 @@
+#!/bin/bash
+
+"$(dirname "$(realpath "$0")")/coding-style-checker/coding-style.sh" . "$(pwd)"
+cat "$(pwd)/coding-style-reports.log"
+rm -f "$(pwd)/coding-style-reports.log"
