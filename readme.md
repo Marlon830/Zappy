@@ -1,5 +1,7 @@
 # Zoat
 
+> Made by **Marlon PEGAHI**, **Alexandre BRET**, **Allan LEHERPEUX**, **Alexis BELMONTE**,**Theodore BILLOTTE**, **Edgar MAUREL**
+
 ## Table of Contents
 
 - [Zoat](#zoat)
